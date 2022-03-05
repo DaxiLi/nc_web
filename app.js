@@ -15,7 +15,7 @@ const body_Parser = require('koa-bodyparser');
 
 const app = new Koa();
 
-const config = require('./config')
+const config = require('./config/config')
 
 
 app.use(async(ctx, next) => {

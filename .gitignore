@@ -5,6 +5,7 @@ test/unit/coverage
 .idea
 .vscode
 test/
+doc.md
 
 # Logs
 logs
