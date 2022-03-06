@@ -7,17 +7,29 @@
  * @FileName: 
  */
 
-var index = async(ctx, next) => {
+var index = async (ctx, next) => {
     ctx.body = `<p>hello!</p>`
 }
-var fun_api = async(ctx, next) => {
+var fun_api = async (ctx, next) => {
     ctx.body = `<p>hello!</p>`
 }
 
 
 module.exports = {
-    'GET /api/': index,
-    'GET /apil/': fun_api
+    "router": [
+        {
+            "method": "GET",
+            "path": '/',
+            "fun": index
+        },
+        {
+            "method": "GET",
+            "path": "apil",
+            "fun": fun_api
+        }
+    ]
+    // 'GET /api/': index,
+    // 'GET /apil/': fun_api
     // 'GET /:board_name': fun_board,
     // 'POST /signin': fn_signin
 };

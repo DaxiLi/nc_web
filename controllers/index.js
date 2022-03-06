@@ -17,10 +17,15 @@ var fun_index = async (ctx, next) => {
 };
 
 
-var fun_board = async(ctx, next) => {
+var fun_board = async (ctx, next) => {
     console.log(ctx.params);
     const board = ctx.params.board_name
     ctx.body = `<p>hello board: ${board}</p>`
+}
+var fun_pboard = async (ctx, next) => {
+    console.log(ctx.params);
+    const board = ctx.params.board_name
+    ctx.body = `<p>hello readonly board: ${board}</p>`
 }
 
 var fn_signin = async (ctx, next) => {
@@ -38,8 +43,38 @@ var fn_signin = async (ctx, next) => {
 
 
 module.exports = {
-    'GET /': fun_index,
-    'GET /:board_name/': fun_board,
-    'GET /:board_name': fun_board,
-    'POST /signin': fn_signin
+    "router":[
+        {
+            "method":"GET",
+            "path": '/',
+            "fun": fun_index
+        },
+        {
+            "method":"GET",
+            "path": /^\/blog\/\d{4}-\d{2}-\d{2}\/?$/i,
+            "fun": fun_index
+        },
+        {
+            "method":"GET",
+            "path": '/p/:board_name/',
+            "fun": fun_pboard
+        },
+        {
+            "method":"GET",
+            "path": '/p/:board_name',
+            "fun": fun_pboard
+        }
+        // ,
+        // {
+        //     "path": '',
+        //     "fun": fun_index
+        // }
+    ]
+    // 'GET /': fun_index,
+    // 'GET /board': fun_board,
+    // // 'GET /:board_name/': fun_board,
+    // // 'GET /:board_name': fun_board,
+    // 'GET /p/:board_name/': fun_pboard,
+    // 'GET /p/:board_name': fun_pboard,
+    // 'POST /signin': fn_signin
 };

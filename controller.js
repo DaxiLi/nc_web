@@ -9,37 +9,66 @@
 const fs = require('fs');
 
 
-function addMapping(router, mapping) {
-    for (var url in mapping) {
-        if (url.startsWith('GET ')) {
-            var path = url.substring(4);
-            router.get(path, mapping[url]);
-            console.log(`register URL mapping: GET ${path}`);
-        } else if (url.startsWith('POST ')) {
-            var path = url.substring(5);
-            router.post(path, mapping[url]);
-            console.log(`register URL mapping: POST ${path}`);
-        } else if (url.startsWith('PUT ')) {
-            var path = url.substring(4);
-            router.put(path, mapping[url]);
-            console.log(`register URL mapping: PUT ${path}`);
-        } else if (url.startsWith('DELETE ')) {
-            var path = url.substring(7);
-            router.del(path, mapping[url]);
-            console.log(`register URL mapping: DELETE ${path}`);
-        } else {
-            console.log(`invalid URL: ${url}`);
+function addRoute(router, routes) {
+    // console.log("routes::", routes)
+    for (i in routes) {
+        let rule = routes[i];
+        // console.log("rule::", rule)
+        switch (rule.method){
+            case 'GET':
+                if (rule.path && rule.fun){
+                    router.get(rule.path, rule.fun)
+                    console.log("GET add route: ", rule.path)
+                }else {
+                    console.log("POST route invalid path!")
+                }
+                break;
+            case 'POST':
+                if (rule.path && rule.fun){
+                    router.post(rule.path, rule.fun)
+                    console.log("POST add route: ", rule.path)
+                }else {
+                    console.log("POST route invalid path!")
+                }
+                break;
+            case 'PUT':
+                if (rule.path && rule.fun){
+                    router.put(rule.path, rule.fun)
+                    console.log("PUT add route: ", rule.path)
+                }else {
+                    console.log("PUT route invalid path!")
+                }
+                break;
+            case 'DELETE':
+                if (rule.path && rule.fun){
+                    router.delete(rule.path, rule.fun)
+                    console.log("DELETE add route: ", rule.path)
+                }else {
+                    console.log("DELETE route invalid path!")
+                }
+                break;
+            case 'HEAD':
+                if (rule.path && rule.fun){
+                    router.head(rule.path, rule.fun)
+                    console.log("HEAD add route: ", rule.path)
+                }else {
+                    console.log("HEAD route invalid path!")
+                }
+                break;
+            default:
+                console.log('Unsupport Method: ', rule.method);
+
         }
     }
 }
-
 function addControllers(router, dir) {
     fs.readdirSync(__dirname + '/' + dir).filter((f) => {
         return f.endsWith('.js');
     }).forEach((f) => {
         console.log(`process controller: ${f}...`);
-        let mapping = require(__dirname + '/' + dir + '/' + f);
-        addMapping(router, mapping);
+        let control = require(__dirname + '/' + dir + '/' + f);
+        // console.log('mapping:', control)
+        addRoute(router, control.router);
     });
 }
 
