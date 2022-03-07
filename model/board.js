@@ -75,11 +75,9 @@ module.exports = class Board {
     }
 
 
-
     async deleted() {
         console.log("deleted name:" + this.#_name)
         let sql = "UPDATE boards SET `deleted` = 1 WHERE name = ? AND deleted = 0;"
-        // let vals = [this.#_name]
         await DB.querySync(sql, [this.#_name]);
     }
 
@@ -159,15 +157,15 @@ module.exports = class Board {
         return this._new_password || this.#_password;
     }
 
-    set password(value){
-        if (value !== this.password){
+    set password(value) {
+        if (value !== this.password) {
             this.#_password = value;
             this.#_session = TOOLS.getUniqueID()
         }
     }
 
     set newPassword(value) {
-        if (value !== this.password){
+        if (value !== this.password) {
             this.#_password = value;
             this.#_session = TOOLS.getUniqueID()
         }
@@ -272,16 +270,16 @@ module.exports = class Board {
 
     parse(board) {
         this.name = board.name,
-            this.id = board.id,
-            this.created = board.created,
-            this.expired = board.expired,
-            this.views = board.views,
-            this.contentUrl = board.contentUrl,
-            this.password = board.password,
-            this.activeTime = board.activeTime,
-            this.lastView = board.lastView,
-            this.ban = board.ban,
-            this.readonlyId = board.readonlyId,
-            this.session = board.session
+        this.id = board.id,
+        this.created = board.created,
+        this.expired = board.expired,
+        this.views = board.views,
+        this.contentUrl = board.contentUrl,
+        this.password = board.password,
+        this.activeTime = board.activeTime,
+        this.lastView = board.lastView,
+        this.ban = board.ban,
+        this.readonlyId = board.readonlyId,
+        this.session = board.session
     }
 }

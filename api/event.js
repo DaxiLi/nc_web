@@ -336,7 +336,7 @@ module.exports = async function (ctx, event) {
         return;
     }
     board = ctx.params.board_name || ctx.params[0] || path
-    console.log("event12345:", event);
+    // console.log("event12345:", event);
     if (event) {
         switch (event) {
             case 'get':
