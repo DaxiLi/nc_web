@@ -1,0 +1,106 @@
+## PATH
+
+----
+
+### /api/
+
+method : GET 参数
+
+   ```json
+
+   {
+
+  path: string
+
+  // 剪切板名称
+
+  "event": "getBoard"
+
+  //    passwd: string //剪切板密码
+
+}
+
+   ```
+
+返回
+
+   ```json
+
+    {"
+
+  status: int
+
+  //0 success -1 error
+
+  errcode: int
+
+  // status != 0 时，携带;401 需要密码 ; 404 剪切板不存在 ;501:非法操作
+
+  msg: string
+
+  //服务端返回的信息
+
+  data: {
+
+    conten: Object
+
+    // 如果请求成功，返回的剪切板对象
+
+  }
+
+  // 返回的数据
+
+}
+
+   ```
+
+---
+
+method: POST 参数
+
+   ```json
+
+   {
+
+  path: string,
+
+  \"event\": save
+
+  data: {
+
+    content: Object
+
+    // 剪切板信息
+
+  }
+
+}
+
+
+   ```
+
+返回
+
+   ```json
+
+   {
+
+  status: int
+  //0 success -1 error
+  errcode: int
+  // status != 0 时，携带; 401:需要密码 ; 404 剪切板不存在 ;501:非法操作
+
+  msg: string
+  //服务端返回的信息
+
+  data: {
+
+  }
+
+  // 返回的数据
+
+}
+
+```
+
+获取剪切板详情

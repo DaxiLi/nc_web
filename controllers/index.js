@@ -6,6 +6,10 @@
  * @LastEditTime: 2022-03-03 14:55:58
  * @FileName: 
  */
+
+
+const  events = require('../api/event.js')
+
 var fun_index = async (ctx, next) => {
     console.log('accept request GET /');
     ctx.response.body = `<h1>Index</h1>
@@ -17,11 +21,39 @@ var fun_index = async (ctx, next) => {
 };
 
 
-var fun_board = async (ctx, next) => {
-    console.log(ctx.params);
-    const board = ctx.params.board_name
-    ctx.body = `<p>hello board: ${board}</p>`
-}
+var get_board = async (ctx, next) => {
+    // console.log(ctx.params);
+    // console.info(ctx.request.query)
+    // const {event, path, token, data} = ctx.request.query
+    // const board = ctx.params.board_name || ctx.params[0] || path
+    let event = (ctx.request.body.event ||  ctx.request.query.event);
+    // console.log("body event:", ctx.request.body.event);
+    // console.log("query event:", ctx.request.query.event);
+    // console.log(ctx.request.body.event ||  ctx.request.query.event)
+    console.log("beaore process")
+    await events(ctx,event)
+    console.log("after process")
+    // switch (event){
+    //     case 'event':
+    //         break;
+    //     case 'path':
+    //         break;
+    // }
+    ctx.session.user = 'xxxx';
+    // ctx.body = `<p>hello board: ${board}</p>`
+};
+
+var post_board = async (ctx, next) => {
+    // const board = ctx.params.board_name || ctx.params[0]
+    const {event} = ctx.request.body
+    ctx.accepts('json')
+    await events(ctx,event)
+    // console.log('session', ctx.session);
+    // ctx.session.user = 'zzz';
+    // ctx.body = `<p>hello POST board: ${board} ${event} ${path}</p>`
+
+};
+
 var fun_pboard = async (ctx, next) => {
     console.log(ctx.params);
     const board = ctx.params.board_name
@@ -51,8 +83,13 @@ module.exports = {
         },
         {
             "method":"GET",
-            "path": /^\/blog\/\d{4}-\d{2}-\d{2}\/?$/i,
-            "fun": fun_index
+            "path": ["/:board_name", /^\/([^\/]*)(\/.*)/i],
+            "fun": get_board
+        },
+        {
+            "method":"POST",
+            "path": ["/:board_name", /^\/([^\/]*)(\/.*)/i],
+            "fun": post_board
         },
         {
             "method":"GET",
@@ -64,17 +101,6 @@ module.exports = {
             "path": '/p/:board_name',
             "fun": fun_pboard
         }
-        // ,
-        // {
-        //     "path": '',
-        //     "fun": fun_index
-        // }
     ]
-    // 'GET /': fun_index,
-    // 'GET /board': fun_board,
-    // // 'GET /:board_name/': fun_board,
-    // // 'GET /:board_name': fun_board,
-    // 'GET /p/:board_name/': fun_pboard,
-    // 'GET /p/:board_name': fun_pboard,
-    // 'POST /signin': fn_signin
+
 };

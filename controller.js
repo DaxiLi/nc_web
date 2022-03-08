@@ -10,10 +10,8 @@ const fs = require('fs');
 
 
 function addRoute(router, routes) {
-    // console.log("routes::", routes)
     for (i in routes) {
         let rule = routes[i];
-        // console.log("rule::", rule)
         switch (rule.method){
             case 'GET':
                 if (rule.path && rule.fun){
@@ -57,9 +55,9 @@ function addRoute(router, routes) {
                 break;
             default:
                 console.log('Unsupport Method: ', rule.method);
-
         }
     }
+    console.log("controller added end")
 }
 function addControllers(router, dir) {
     fs.readdirSync(__dirname + '/' + dir).filter((f) => {
@@ -67,7 +65,6 @@ function addControllers(router, dir) {
     }).forEach((f) => {
         console.log(`process controller: ${f}...`);
         let control = require(__dirname + '/' + dir + '/' + f);
-        // console.log('mapping:', control)
         addRoute(router, control.router);
     });
 }
