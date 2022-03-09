@@ -12,6 +12,7 @@ let config = {
     "site":{
       "text_prefix":"http://stary.img.jieis.cn/",
         "content_dir":"boards/",   // 存放剪切板的目录
+        "file_dir": "files/",
         "qiniu_url":"http://stary.img.jieis.cn",
         // "url": ""
     },

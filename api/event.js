@@ -82,6 +82,7 @@ const DB = require('../utils/mysql.js')
 let Board = require('../model/board')
 const QN = require('../utils/qnOpt')
 const CONFIG = require('../config/config')
+const TOOLS = require('../utils/tools')
 
 const STATUS = {
     success: {
@@ -146,37 +147,54 @@ const response = function (status, msg, data) {
 //     if ()
 // }
 
+const author = function (ctx, body, mBoard){
+    // const body = ctx.request.query
+    // body.board = ctx.params.board_name || ctx.params[0] || body.path
+    // const {path, password, data} = ctx.request.body
+    // const board = ctx.params.board_name || ctx.params[0] || path
+    if (body == null || body.board == null || mBoard == null) {
+        return false
+    }
+    //  没有密码
+    if (mBoard.password === '') {
+        return true
+    }
+    // 密码正确
+    if (body.password === mBoard.password) {
+        ctx.session.session = mBoard.session;
+        return true
+    }
+    // session 正确
+    if (ctx.session.session === mBoard.session) {
+        return true
+    }
+    //cant reach here
+    return false
+}
+
 const get = async function (ctx) {
     if (ctx.request.method == 'POST') {
         console.log("mehod err")
         ctx.body = JSON.stringify(response(STATUS.method_error, "test", {}))
         return;
     }
-    const {path, data, password} = ctx.request.query
-    const board = ctx.params.board_name || ctx.params[0] || path
-    if (board == null) {
+    const body = ctx.request.query
+    // const {path, data, password} = ctx.request.query
+    body.board = ctx.params.board_name || ctx.params[0] || body.path
+    if (body.board == null) {
         ctx.body = JSON.stringify(response(STATUS.bad_request))
+        return
     }
-    console.log(board)
-    let mBoard = new Board(board)
+    // console.log(board)
+    let mBoard = new Board(body.board)
     await mBoard.read()
-    // 有密码，需要检验 session
-    // console.log("board paswd:", mBoard.password);
-    // console.log("client passwd:", password)
-    if (mBoard.password !== '') {
-        if (password === mBoard.password) {
-            ctx.session.session = mBoard.session;
-        }
-        // else {
-        //     // 主动输入错误密码，失去登录态
-        //     ctx.body = JSON.stringify(response(STATUS.author_fail))
-        //     return
-        // }
-        if (ctx.session.session !== mBoard.session) {
-            ctx.body = JSON.stringify(response(STATUS.author_fail))
-            return
-        }
+    // console.log(body)
+    // 验证身份
+    if (!author(ctx, body, mBoard)){
+        ctx.body = JSON.stringify(response(STATUS.author_fail))
+        return
     }
+    // 有密码，需要检验 session
     mBoard.views += 1;
     mBoard.save()
     var boardObj = mBoard.toSafeObj()
@@ -203,51 +221,40 @@ const save = async function (ctx) {
     }
     // const {path, password, data} = ctx.request.query
     // POST 暂不支持 url encode
-    const {path, password, data} = ctx.request.body
-    const board = ctx.params.board_name || ctx.params[0] || path
-    if (board == null) {
+    // const {path, password, data} = ctx.request.body
+    const body = ctx.request.body
+    body.board = ctx.params.board_name || ctx.params[0] || body.path
+    if (body.board == null) {
         ctx.body = JSON.stringify(response(STATUS.bad_request))
     }
-    let mBoard = new Board(board)
+    let mBoard = new Board(body.board)
     await mBoard.read()
-    if (mBoard.password !== '') {
-        // console.log("client passwd:", password)
-        // console.log("serve passwd:", mBoard.password)
-        // console.log(password === mBoard.password)
-        if (password === mBoard.password) {
-            ctx.session.session = mBoard.session;
-        }
-        // console.log("client session:", ctx.session.session)
-        // console.log("serve session:", mBoard.session)
-        // console.log("type client", typeof ctx.session.session)
-        // console.log("type serve", typeof mBoard.session)
-        // console.log(ctx.session.session !== mBoard.session)
-        if (ctx.session.session !== mBoard.session) {
-            ctx.body = JSON.stringify(response(STATUS.author_fail))
-            return
-        }
+    // 验证身份
+    if (!author(ctx, body, mBoard)){
+        ctx.body = JSON.stringify(response(STATUS.author_fail))
+        return
     }
-    // 没有任何数据，bad
-    if (!data || !data.expired) {
+    //
+    if (!body.data || !body.data.expired) {
         ctx.body = JSON.stringify(response(STATUS.bad_request))
         return
     }
-    if (typeof data.expired !== 'number') {
+    if (typeof body.data.expired !== 'number') {
         ctx.body = JSON.stringify(response(STATUS.bad_request, "到期日期必须为数字"))
         return
     }
-    if (!EXPIRE[data.expired]) {
+    if (!EXPIRE[body.data.expired]) {
         ctx.body = JSON.stringify(response(STATUS.bad_request, "到期日期必须不合法"))
         return
     }
     mBoard.expired.setDate(new Date().getDate() + data.expired);
     // mBoard.expired = mBoard.expired.getDate() + data.expired;
-    mBoard.activeTime = EXPIRE[data.expired];
+    mBoard.activeTime = EXPIRE[body.data.expired];
     //带有密码
     // 设置新密码
-    if (data.password) {
+    if (body.data.password) {
         console.log("new passwd")
-        mBoard.newPassword = data.password
+        mBoard.newPassword = body.data.password
         // 更新密码后，session 也会变
         ctx.session.session = mBoard.session
     }
@@ -262,11 +269,43 @@ const upload = function (ctx) {
     }
 }
 
-const uploadToken = function (ctx) {
+const uploadToken = async function (ctx) {
     if (ctx.request.method == 'POST') {
         ctx.body = JSON.stringify(response(STATUS.method_error))
         return;
     }
+    const body = ctx.request.query
+    console.log(body)
+    body.board = ctx.params.board_name || ctx.params[0] || body.path
+    if (body.board == null) {
+        ctx.body = JSON.stringify(response(STATUS.bad_request))
+    }
+    let mBoard = new Board(body.board)
+    await mBoard.read()
+    // 验证身份
+    if (!author(ctx, body, mBoard)){
+        ctx.body = JSON.stringify(response(STATUS.author_fail))
+        return
+    }
+    if (!body.filename){
+        ctx.body = JSON.stringify(response(STATUS.bad_request))
+        return
+    }
+    var file_name = body.filename;
+    var file_path = CONFIG.site.file_dir + TOOLS.getUniqueID() + file_name
+    if (file_path.length > 100){
+        ctx.body = JSON.stringify(response(STATUS.bad_request));
+        return
+    }
+    const url = QN.getDownloadUrl(file_path,3600)
+    if (url){
+        ctx.body = JSON.stringify(response(STATUS.success,"success", {
+            "url": url
+        }))
+        return
+    }
+    ctx.body = JSON.stringify(response(STATUS.serve_error))
+    return
 }
 
 const del = function (ctx) {
